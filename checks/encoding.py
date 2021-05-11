@@ -116,4 +116,4 @@ def checkEncoding(lines):
         else:
             severity = LEVEL_INFO
         return [severity, "{}% Encoder Overload".format(val),
-                """Encoder overload may be related to cpu or gpu overload, depending on encoder in question. If you are using software(x264) please see the cpu overload guide <a href="https://obsproject.com/wiki/General-Performance-and-Encoding-Issues">General Performance and Encoding Issues</a>. If using a hardware encoder(amf, qsv/quicksync, nvenc) please see the gpu overload guide <a href="https://obsproject.com/wiki/GPU-overload-issues">GPU Overload Issues</a>."""]
+                """Encoder overload may be related to cpu or gpu overload, depending on encoder in question. If you are using software(x264) please see the cpu overload guide <a href="https://obsproject.com/wiki/General-Performance-and-Encoding-Issues">General Performance and Encoding Issues</a>". If using a hardware encoder(amf, qsv/quicksync, nvenc) please see the gpu overload guide <a href="https://obsproject.com/wiki/GPU-overload-issues">GPU Overload Issues</a>."""]
