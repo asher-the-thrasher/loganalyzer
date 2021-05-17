@@ -57,3 +57,26 @@ def checkNICSpeed(lines):
                     if 'GbE' in nic or 'Gigabit' in nic:
                         return [LEVEL_WARNING, "Slow Network Connection", "Your gigabit-capable network card is only connecting at 100mbps. This may indicate a bad network cable or outdated router / switch which could be impacting network performance."]
     return None
+
+
+x264stream_re = re.compile(r"stream")
+
+
+def checkDynamicBitrate(lines):
+    dynBrLines = search('Dynamic bitrate enabled', lines)
+    if (len(dynBrLines) > 0):
+        x264Lines = search('x264 encoder: ', lines)
+        for i in x264Lines:
+            if x264stream_re.search(i):
+                return [LEVEL_INFO, "Dynamic Bitrate", "Dynamic Bitrate is enabled. Instead of dropping frames when network issues are detected, OBS will automatically reduce the stream quality to compensate. The bitrate will adjust back to normal once the connection becomes stable. In some (very specific) situations, Dynamic Bitrate can get stuck at a low bitrate. If this happens frequently, it is recommended to turn off Dynamic Bitrate in Settings -> Advanced -> Network."]
+        else:
+            return [LEVEL_WARNING, "Dynamic Bitrate",
+                    """Dynamic Bitrate is enabled and a hardware encoder is potentially in use. This can cause issues with hardware encoders if bitrate changes happen too frequently, or drops too low. Should you experience bitrate dropping to zero, or no output even if OBS says its streaming, either change your Encoder to x264 or turn off Dynamic Bitrate in Settings -> Advanced -> Network."""]
+    return None
+
+
+def checkStreamDelay(lines):
+    delayLines = search('second delay active', lines)
+    if (len(delayLines) > 0):
+        return [LEVEL_INFO, "Stream Delay", "Stream Delay may currently be active. This means that your stream is being delayed by a certain number of seconds. If this is not what you intended, please disable it in Settings -> Advanced -> Stream Delay."]
+    return None

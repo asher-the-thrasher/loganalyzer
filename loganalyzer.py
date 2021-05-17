@@ -164,6 +164,8 @@ def doAnalysis(url=None, filename=None):
                 checkGameMode(logLines),
                 checkWin10Hags(logLines),
                 checkNICSpeed(logLines),
+                checkDynamicBitrate(logLines),
+                checkStreamDelay(logLines),
             ])
             messages.extend(checkVideoSettings(logLines))
             m = parseScenes(logLines)
