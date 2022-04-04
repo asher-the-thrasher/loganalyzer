@@ -17,10 +17,23 @@ winver_re = re.compile(r"""
     """, re.VERBOSE)
 
 
+# Ref: https://docs.microsoft.com/en-us/lifecycle/products/windows-11-home-and-pro-version-21h2
+win11versions = {
+    22000: {
+        "release": 2009,
+        "name": "Windows 11 21H2",
+        "date": datetime.date(2021, 10, 5),
+        "EoS": datetime.date(2023, 10, 10),
+    }
+}
+
+
 # I guess I'll call the Win10 sub-versions "releases", even though Microsoft
 # calls them "versions" because Win10 is also "Version 10.0".
 #
 # We probably don't need all the info here, but it comes in handy
+#
+# Ref: https://docs.microsoft.com/en-us/lifecycle/products/windows-10-home-and-pro
 win10versions = {
     10240: {
         "release": 1507,
@@ -79,20 +92,29 @@ win10versions = {
     19041: {
         "release": 2004,
         "name": "Windows 10 2004",
-        "date": datetime.date(2020, 5, 27)
+        "date": datetime.date(2020, 5, 27),
+        "EoS": datetime.date(2021, 12, 14),
     },
     19042: {
         "release": 2009,
         "name": "Windows 10 20H2",
-        "date": datetime.date(2020, 10, 20)
+        "date": datetime.date(2020, 10, 20),
+        "EoS": datetime.date(2022, 5, 10),
     },
     19043: {
         "release": 2009,
         "name": "Windows 10 21H1",
-        # Placeholder date. 21H1 is in Release Preview
-        # https://docs.microsoft.com/en-us/windows-insider/flight-hub/#windows-10-may-2021-update-21h1
-        "date": datetime.date(2021, 4, 28)
-    }
+        "date": datetime.date(2021, 5, 18),
+        "EoS": datetime.date(2022, 12, 13),
+    },
+    # Placeholder date. 21H2 is in Release Preview
+    19044: {
+        "release": 2009,
+        "name": "Windows 10 21H2",
+        "date": datetime.date(2021, 10, 5),
+        "EoS": datetime.date(2023, 6, 13),
+    },
+    **win11versions
 }
 
 

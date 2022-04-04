@@ -34,7 +34,7 @@ def checkCPU(lines):
                     "Your system is below minimum specs for OBS to run and may be too underpowered to livestream. There are no recommended settings we can suggest, but try the Auto-Config Wizard in the Tools menu. You may need to upgrade or replace your computer for a better experience."]
         elif ('i3' in cpu[0]):
             return [LEVEL_INFO, "Insufficient Hardware",
-                    "Your system is below minimum specs for OBS to run and is too underpowered to livestream using software encoding. Livestreams and recordings will only run smoothly if you are using the hardware QuickSync encoder (via Settings -> Output)."]
+                    "Your system is below minimum specs for OBS to run and is too underpowered to livestream using software encoding. Livestreams and recordings may run more smoothly if you are using a hardware encoder like QuickSync, NVENC or AMF (via Settings -> Output)."]
 
 
 def getOBSVersionLine(lines):
@@ -44,18 +44,15 @@ def getOBSVersionLine(lines):
         correctLine += 1
     if 'multiple instances' in versionLines[correctLine]:
         correctLine += 1
+    if 'windows from screen capture' in versionLines[correctLine]:
+        correctLine += 1
     return versionLines[correctLine]
 
 
 def getOBSVersionString(lines):
     versionLine = getOBSVersionLine(lines)
-    if versionLine.split()[0] == 'OBS':
-        versionString = versionLine.split()[1]
-    elif versionLine.split()[2] == 'OBS':
-        versionString = versionLine.split()[3]
-    else:
-        versionString = versionLine.split()[2]
-    return versionString
+    versionString = versionLine[versionLine.find("OBS"):]
+    return versionString.split()[1]
 
 
 obsver_re = re.compile(r"""
@@ -102,5 +99,5 @@ def checkObsVersion(lines):
             return [LEVEL_INFO, "Release Candidate OBS Version (%s)" % (html.escape(versionString)), """You are running a release candidate version of OBS. There is nothing wrong with this, but you may experience problems that you may not experience with fully released OBS versions. You are encouraged to upgrade to a released version of OBS as soon as one is available."""]
 
     if parse_version(versionString.replace('-modified', '')) < parse_version(CURRENT_VERSION):
-        return [LEVEL_WARNING, "Old Version",
-                """You are not running the latest version of OBS Studio. Please update by downloading the latest installer from the <a href="https://obsproject.com/download">downloads page</a> and running it."""]
+        return [LEVEL_WARNING, "Old Version (%s)" % versionString,
+                """You are running an old version of OBS Studio (%s). Please update to version %s by going to Help -> Check for updates in OBS or by downloading the latest installer from the <a href="https://obsproject.com/download">downloads page</a> and running it.""" % (versionString, CURRENT_VERSION)]

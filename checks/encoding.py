@@ -1,5 +1,6 @@
 from .vars import *
 from .utils.utils import *
+import re
 
 
 def checkAttempt(lines):
@@ -100,6 +101,11 @@ def checkEncodeError(lines):
 
 
 def checkEncoding(lines):
+    hasx264 = len(search('[x264 encoder:', lines))
+    hasNVENC = (len(search('[jim-nvenc:', lines)) + len(search('[NVENC encoder:', lines)))
+    hasAMD = (len(search('[AMF] [H264]', lines)) + len(search('[AMF] [H265]', lines)))
+    hasQSV = len(search('[qsv encoder:', lines))
+    hasAPPLE = (len(search('[VideoToolbox recording_h264:', lines)) + len(search('[VideoToolbox streaming_h264:', lines)))
     drops = search('skipped frames', lines)
     val = 0
     severity = 9000
@@ -115,5 +121,33 @@ def checkEncoding(lines):
             severity = LEVEL_WARNING
         else:
             severity = LEVEL_INFO
-        return [severity, "{}% Encoder Overload".format(val),
-                """Encoder overload may be related to your CPU or GPU being overloaded, depending on the encoder in question. If you are using a software encoder (x264) please see the <a href="https://obsproject.com/wiki/General-Performance-and-Encoding-Issues">CPU Overload Guide</a>. If you are using a hardware encoder (AMF, QSV/Quicksync, NVENC) please see the <a href="https://obsproject.com/wiki/GPU-overload-issues">GPU Overload Guide</a>."""]
+        if (hasx264 > 0 and (hasAMD + hasQSV + hasNVENC + hasAPPLE) > 0):
+            return [severity, "{}% Encoder Overload".format(val),
+                    """Encoder overload may be related to your CPU or GPU being overloaded, depending on the encoder in question. If you are using a software encoder (x264) please see the <a href="https://obsproject.com/wiki/General-Performance-and-Encoding-Issues">CPU Overload Guide</a>. If you are using a hardware encoder (AMF, QSV/Quicksync, NVENC) please see the <a href="https://obsproject.com/wiki/GPU-overload-issues">GPU Overload Guide</a>."""]
+        elif (hasx264 > 0):
+            return [severity, "{}% CPU Encoder Overload".format(val),
+                    """The encoder is skipping frames because of CPU overload. Read about <a href="https://obsproject.com/wiki/General-Performance-and-Encoding-Issues">General Performance and Encoding Issues</a>."""]
+        elif ((hasNVENC + hasAMD + hasQSV + hasAPPLE) > 0):
+            return [severity, "{}% GPU Encoder Overload".format(val),
+                    """The encoder is skipping frames because of GPU overload. Read about troubleshooting tips in our <a href="https://obsproject.com/wiki/GPU-overload-issues">GPU Overload Guide</a>."""]
+        else:
+            return [severity, "{}% Encoder Overload".format(val),
+                    """Encoder overload may be related to your CPU or GPU being overloaded, depending on the encoder in question. If you are using a software encoder (x264) please see the <a href="https://obsproject.com/wiki/General-Performance-and-Encoding-Issues">CPU Overload Guide</a>. If you are using a hardware encoder (AMF, QSV/Quicksync, NVENC) please see the <a href="https://obsproject.com/wiki/GPU-overload-issues">GPU Overload Guide</a>."""]
+
+
+unknownenc_re = re.compile(r"Encoder\sID\s'(?P<name>.+)'\snot\sfound")
+
+
+def checkUnknownEncoder(lines):
+    encLines = search('Encoder ID', lines)
+    outdatedEncMac = ['vt_h264_sw', 'vt_h264_hw']
+    if (len(encLines) > 0):
+        for i in encLines:
+            m = unknownenc_re.search(i)
+            if m:
+                encName = m.group("name")
+                if encName in outdatedEncMac:
+                    return [LEVEL_CRITICAL, "Outdated Encoder Set",
+                            "In OBS v27, the Apple VT encoder was changed to better support the Apple M1 platform, which resulted in the existing encoder becoming unrecognised. Manually navigate to Settings -> Output and set the 'Encoder' to fix this."]
+                return [LEVEL_WARNING, "Unrecognised Encoder",
+                        "One of the configured encoders is not recognised. This can result in failure to go live or to record. To fix this, go to Settings -> Output and change the 'Encoder' option."]
