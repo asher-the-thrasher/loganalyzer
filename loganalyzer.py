@@ -168,8 +168,7 @@ def doAnalysis(url=None, filename=None):
                 checkNICSpeed(logLines),
                 checkDynamicBitrate(logLines),
                 checkStreamDelay(logLines),
-                checkUnknownEncoder(logLines),
-                checkBrowserSource(logLines)
+                checkUnknownEncoder(logLines)
             ])
             messages.extend(checkVideoSettings(logLines))
             m = parseScenes(logLines)
